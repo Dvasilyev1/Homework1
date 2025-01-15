@@ -74,7 +74,7 @@ public class Homework {
         // Сложность по памяти O(1), не создавать новые String, StringBuilder
         public static boolean isPalindrome(String string) {
 
-        //если количество букв четное, попадаем в этот if
+        //если количество букв четное, попадаем в этот  if
             if (string.length() % 2 == 0) {
                 for (int i = 0, n = 1; i < string.length() / 2; i++, n++) {
                     char initialLetter = string.charAt(i);
