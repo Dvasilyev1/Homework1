@@ -1,4 +1,6 @@
 import java.util.*;
+
+import static com.sun.tools.javac.util.ArrayUtils.ensureCapacity;
 /*
  * Этот класс демонстрирует работу с коллекциями в Java, а также включает алгоритм сортировки QuickSort
  * для списка любых типов, используя Comparator.
@@ -8,90 +10,155 @@ public class Homework2 {
 
     // Главный метод программы, который выполняет демонстрацию работы с коллекциями и сортировкой.
     public static void main(String[] args) {
-        myArrayList();
+        MyArrayList<Object> list = new MyArrayList<>();
+
+        System.out.println("Добавляем элементы в список методом add:");
+        list.add(5); // индекс 0
+        list.add(2); // индекс 1
+
+        list.getList(list);
+
+        System.out.println("Добавляем элементы в список по индексу:");
+        list.add(2,3);
+        list.add(3,1);
+        list.add(4,2);
+        list.add(5,4);
+        list.getList(list);
+
+        System.out.println("Список после удаления элемента по индексу:");
+        list.remove(4);
+
+        list.getList(list);
+
+        System.out.println("Отсортированный список:");
+
+        Comparator<Object> comparator = (o1, o2) -> {
+            // Сравнение строк
+            if (o1 instanceof String && o2 instanceof String) {
+                return ((String) o1).compareTo((String) o2);
+            }
+            // Сравнение чисел
+            if (o1 instanceof Integer && o2 instanceof Integer) {
+                return ((Integer) o1).compareTo((Integer) o2);
+            }
+            // Сравнение символов
+            if (o1 instanceof Character && o2 instanceof Character) {
+                return ((Character) o1).compareTo((Character) o2);
+            }
+            // Если типы разные, приводим их к строке и сравниваем
+            return String.valueOf(o1).compareTo(String.valueOf(o2));
+        };
+
+        list.sort(comparator);
+        list.getList(list);
+
+        // Очищаем список
+        list.clear();
+        System.out.println("Список после очистки методом remove");
+        list.getList(list);
+        // Добавляем элементы в список для сортировки методом quicksort
+        list.add(3);
+        list.add(1);
+        list.add(2);
+        list.add(4);
+        list.add(6);
+        list.add(5);
+        System.out.println("Список до сортировки методом quicksort:");
+        list.getList(list);
+
+        System.out.println("Список отсортированный методом quicksort:");
+        quickSort(list,0, list.size-1,comparator);
+        list.getList(list);
     }
+
 
     /*Демонстрация работы с ArrayList. Включает добавление, удаление, сортировку и очистку элементов.
     Также выполняется сортировка коллекции с помощью алгоритма QuickSort.
      */
-    public static void myArrayList() {
-        ArrayList<Integer> arrayList = new ArrayList<>();
+    public static class MyArrayList<T> {
+        private Object[] elements;
+        private int size;
 
-        // Добавляем элемент
-        arrayList.add(3);
-        System.out.println("После добавления 1 элемента: " + arrayList);
+        public MyArrayList(){
+            elements = new Object[5];
+            size = 0;
+        }
 
-        // Добавляем элемент на определенную позицию
-        arrayList.add(0, 33);
-        System.out.println("После добавления элемента по индексу: " + arrayList);
+        public void add(T element){
+            ensureCapacity();
+            elements[size++] = element;
+        }
 
-        // Получаем элемент
-        int firstElement = arrayList.get(0);
-        System.out.println("Первый элемент списка: " + firstElement);
+        public void add(int index, T element) {
+            if (index < 0 ) {
+                throw new IndexOutOfBoundsException("Invalid index");
+            }
+            while( index >= elements.length){
+                ensureCapacity();
+            }
+            if(index >= size){
+                Arrays.fill(elements, size, index,null);
+                size = index + 1;
+            }
+            elements[index] = element;
+        }
 
-        // Удаляем элемент
-        arrayList.remove(1);
-        System.out.println("После удаления элемента: " + arrayList);
-
-        // Очищаем список
-        arrayList.clear();
-        System.out.println("После очистки списка: " + arrayList);
-
-        // Добавляем элементы снова
-        arrayList.add(2);
-        arrayList.add(33);
-        arrayList.add(8);
-        arrayList.add(9);
-        arrayList.add(3);
-        arrayList.add(5);
-
-        // Сортируем список
-        Collections.sort(arrayList);
-        System.out.println("После сортировки добавления: " + arrayList);
-
-        // Очищаем список для добавления не упорядоченных элементов
-        arrayList.clear();
-
-        //Добавляем элементы
-        arrayList.add(2);
-        arrayList.add(33);
-        arrayList.add(8);
-        arrayList.add(9);
-        arrayList.add(3);
-        arrayList.add(5);
+        public T get (int index){
+            if(index < 0 || index >= size)
+                throw new IndexOutOfBoundsException("Invalid index");
+            return (T) elements[index];
+        }
 
 
-        System.out.println("До сортировки методом quickSort"+"\n"+ arrayList);
+        public int size(){
+            return size;
+        }
 
-        // Передаем параметры в наш метод quickSort
-        quickSort(arrayList, 0, arrayList.size() - 1, Comparator.naturalOrder());
+        private void ensureCapacity() {
+            elements = java.util.Arrays.copyOf(elements,elements.length * 2);
+        }
 
-        // Передаем отсортированный список в метод, который его выводит
-        printList(arrayList);
+        private static void getList(MyArrayList list){
+            for (int i = 0; i < list.size; i++) {
+                System.out.println(list.get(i) + " ");
+            }
+        }
 
-        // Создаем список типа String
-        ArrayList <String> listFruit = new ArrayList<>();
+        public void remove(int index){
+            if(index < 0 || index>= size)
+                throw new IndexOutOfBoundsException("Invalid index");
+            for (int i = index; i < size - 1 ; i++) {
+                elements[i] = elements[i+1];
+                elements[size-1]= null;
+            }
+            size--;
+        }
 
-        // Добавляем элементы
-        listFruit.add("Banana");
-        listFruit.add("Kiwi");
-        listFruit.add("Apple");
-        listFruit.add("Blueberry");
-        listFruit.add("Orange");
+        public void clear(){
+            for (int i = 0; i < size; i++) {
+                elements[i] = null;
+            }
+            size = 0;
+        }
 
-        System.out.println("До сортировки методом  quickSort" +"\n"+ listFruit);
-        // Передаем параметры в наш метод quickSort
-        quickSort(listFruit, 0, listFruit.size() - 1, Comparator.naturalOrder());
+        public void sort(Comparator<T> comporator){
+            if (size <= 1){
+                return;
+            }
+            T[] typedElements = (T[]) Arrays.copyOf(elements,size);
+            Arrays.sort(typedElements,comporator);
 
-        // Передаем отсортированный список в метод, который его выводит
-        printList(listFruit);
+            for (int i = 0; i < size; i++) {
+                elements[i] = typedElements[i];
+            }
+        }
     }
 
     // Создаем метод quickSort, который принимает параметрами: List любого типа. левую границу List, правую границу List и компаратор
-    public static <T> void quickSort(List<T> list, int leftIndex, int rightIndex, Comparator<T> comparator) {
+    public static <T> void quickSort(MyArrayList<T> list, int leftIndex, int rightIndex, Comparator<T> comparator) {
 
         // Если левое значение по индексу меньше правого рекурсивно вызываем quickSort
-        if (leftIndex <= rightIndex || list.isEmpty()) {
+        if (leftIndex <= rightIndex) {
 
             // Находим середину list'a и указываем опорный элемент
             int pivotIndex = (leftIndex + rightIndex) / 2;
@@ -114,10 +181,10 @@ public class Homework2 {
                 // Если значение в левом маркере больше значения в правом маркере, меняем их местами
                 if (leftMarker <= rightMarker) {
                     T swap = list.get(leftMarker);
-                    list.set(leftMarker, list.get(rightMarker));
-                    list.set(rightMarker, swap);
+                    list.add(leftMarker, list.get(rightMarker));
+                    list.add(rightMarker, swap);
 
-                // Двигаем маркеры (довольные собой шагаем дальше)
+                    // Двигаем маркеры (довольные собой шагаем дальше)
                     leftMarker++;
                     rightMarker--;
                 }
@@ -138,6 +205,5 @@ public class Homework2 {
         }
         System.out.println();
     }
-}    
-
+}
 
